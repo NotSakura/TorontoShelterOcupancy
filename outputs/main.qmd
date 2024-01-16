@@ -82,6 +82,8 @@ ggplot(summary, aes(x = occupancy_month, y = number_occupied)) +
   theme_minimal()
 ```
 Analysis:
+git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
 
 Shown in the graph above, the trend follows that the number of occupied beds in shelters around Toronto depend on the month. There is a peak in the month of December and a drop in the month of april. This makes sense as the weather in Toronto is very cold during the winter months meaning more people seekout homeless shelters as opposed to in the summer/spring-like months where the temperature is not too cold or hot for the homeless population of Toronto to seek asylum from the weather outside. 
 
