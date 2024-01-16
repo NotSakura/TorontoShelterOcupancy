@@ -1,0 +1,88 @@
+---
+title: "Toronto Shelter Occupancy"
+author: "Sakura Noskor"
+format: html
+---
+
+```{r}
+#| warning: false
+#### Preamble ####
+# Purpose: Get data on 2021 shelter usage and make table
+# Author: Rohan Alexander
+# Email: rohan.alexander@utoronto.ca
+# Date: 1 July 2022
+# Prerequisites: -
+
+#### Workspace setup ####
+#install.packages("opendatatoronto")
+#install.packages("janitor")
+#install.packages("lubridate")
+#install.packages("tidyverse")
+#install.packages("knitr")
+
+library(knitr)
+library(janitor)
+library(lubridate)
+library(opendatatoronto)
+library(tidyverse)
+
+citation("ggplot2")
+```
+
+First, to clean and load the data
+```{r}
+toronto_shelters <-
+  list_package_resources("21c83b32-d5a8-4106-a54f-010dbe49f6f2") |>
+  filter(name == 
+    "daily-shelter-overnight-service-occupancy-capacity-2021.csv") |>
+  get_resource()
+
+
+write_csv(
+  x = toronto_shelters,
+  file = "toronto_shelters.csv"
+)
+
+toronto_shelters_clean <-
+  clean_names(toronto_shelters) |>
+  mutate(occupancy_date = ymd(occupancy_date)) |> 
+  select(occupancy_date, occupied_beds)
+
+write_csv(
+  x = toronto_shelters_clean,
+  file = "cleaned_toronto_shelters.csv"
+)
+```
+
+Next to create a graph:
+```{r}
+
+toronto_shelters_clean <-
+  read_csv(
+    "cleaned_toronto_shelters.csv",
+    show_col_types = FALSE
+  )
+
+summary <- toronto_shelters_clean |>
+  mutate(occupancy_month = month(
+    occupancy_date,
+    label = TRUE,
+    abbr = FALSE
+  )) |>
+  arrange(month(occupancy_date)) |> 
+  drop_na(occupied_beds) |> 
+  summarise(number_occupied = mean(occupied_beds),
+            .by = occupancy_month)
+
+ggplot(summary, aes(x = occupancy_month, y = number_occupied)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Average Monthly Shelter Occupancy in Toronto",
+       x = "Month",
+       y = "Number of Occupied Beds") +
+  theme_minimal()
+```
+Analysis:
+
+Shown in the graph above, the trend follows that the number of occupied beds in shelters around Toronto depend on the month. There is a peak in the month of December and a drop in the month of april. This makes sense as the weather in Toronto is very cold during the winter months meaning more people seekout homeless shelters as opposed to in the summer/spring-like months where the temperature is not too cold or hot for the homeless population of Toronto to seek asylum from the weather outside. 
+
+This dataset was collected by the city of Toronto and hense it is a government organisation. The data set is not biased but it may be skewed as the data collected does not cover the greater Toronto Area know as the GTA. This is important as there could be more homeless shelters in the suburban areas. 
